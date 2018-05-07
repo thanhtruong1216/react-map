@@ -8,16 +8,15 @@ class MyMap extends Component {
   constructor(props) {
     super(props);
     this.mapDom = React.createRef();
+    this.markers = {};
     this.state = {
       venues: [],
       result: [],
-      markers: [],
       searchingState: false,
       largeInfowindow: null,
       locations: locations
     }
   }
-
   filterLocation = (e) => {
     this.setState({
       searchingState: true
@@ -25,11 +24,28 @@ class MyMap extends Component {
     const {result} = this.state;
     e.preventDefault();
     const {locations} = this.state;
-    let locationTitle = locations.map((location) => {
-      return location.title;
+    let locationFiltered = locations.filter((location) => location.title.match(new RegExp(this.input.value)));
+    this.setState({result: locationFiltered})
+
+    // let locationIdsResult = result.map(x => x.id + '');
+    let locationIdsResult = locationFiltered.map(x => x.id + '');
+
+    let locationIdsThatHasMarker = Object.keys(this.markers);
+    let set1 = new Set(locationIdsResult);
+    let set2 = new Set(locationIdsThatHasMarker);
+    debugger
+    let locationIdsDifference = [...set2].filter(x => !set1.has(x)).map(Number);
+    let diff_markers = locationIdsDifference.map(id => this.markers[id]);
+    console.log("Diff", diff_markers);
+    diff_markers.forEach(function(marker) {
+      marker.setMap(null);
     })
-    let locationFilter = locationTitle.filter((title) => title.match(new RegExp(this.input.value)));
-    this.setState({result: locationFilter})
+
+    locationIdsDifference.forEach(id => {
+      delete this.markers[id];
+    })
+
+    this.populateInfoWindow(this.markers);
   }
 
   componentDidMount() {
@@ -63,7 +79,7 @@ class MyMap extends Component {
   }
 
   initMap() {
-    let bounds = new google.maps.LatLngBounds();
+    this.bounds = new google.maps.LatLngBounds();
     let defaultIcon = makeMarkerIcon('0091ff');
     let highlightedIcon = makeMarkerIcon('FFFF24');
     let mapDom = document.getElementById('map');
@@ -73,7 +89,7 @@ class MyMap extends Component {
       styles: styles,
       mapTypeControl: false
     };
-    this.state.largeInfowindow = new google.maps.InfoWindow();
+    this.setState({largeInfowindow: new google.maps.InfoWindow()});
     this.map = new google.maps.Map(mapDom, mapConfigs);
     function makeMarkerIcon(markerColor) {
       let markerImage = new google.maps.MarkerImage(
@@ -85,6 +101,8 @@ class MyMap extends Component {
         new google.maps.Size(21,34));
       return markerImage;
     }
+
+
     for(let i = 0; i < this.state.locations.length; i++) {
       let location = this.state.locations[i]
       let position = location.location;
@@ -102,18 +120,16 @@ class MyMap extends Component {
         animation: google.maps.Animation.DROP,
         id: id
       })
-
-     this.setState(({markers}) => ({
-        markers: [...markers, {id: location.id, marker: marker}]
-      }));
+      this.markers[location.id] = marker;
 
      // let markers = this.state.markers;
      // let newMarkers = [...markers, marker];
      // this.setState({markers: newMarkers});
 
-      bounds.extend(marker.position);
+      this.bounds.extend(marker.position);
+
       marker.addListener('click', () => {
-        populateInfoWindow(this.map, marker, this.state.largeInfowindow);
+        this.populateInfoWindow(marker, this.state.largeInfowindow);
       });
 
       marker.addListener('mouseover', function() {
@@ -124,22 +140,28 @@ class MyMap extends Component {
       });
     }
 
-    function populateInfoWindow(map, marker, infowindow) {
-      if(marker.infowindow != marker) {
-        infowindow.marker = marker;
-        infowindow.setContent(`
-          <div class="marker-image-container"><img class="marker-image" src=${marker.image} alt=${marker.title}/>
-          </div><div>${marker.title}</div>
-          <div>${marker.type}</div>
-        `);
-        infowindow.open(map, marker);
-        infowindow.addListener('click', () => {
-          infowindow.close();
-        });
-      }
-    }
-    this.map.fitBounds(bounds);
+    this.map.fitBounds(this.bounds);
+  }
 
+  populateInfoWindow = (marker) => {
+    let infowindow = this.state.largeInfowindow;
+
+    if(infowindow.marker != marker) {
+      infowindow.marker = marker;
+      infowindow.setContent(`
+        <div class="marker-image-container"><img class="marker-image" src=${marker.image} alt=${marker.title}/>
+        </div><div>${marker.title}</div>
+        <div>${marker.type}</div>
+      `);
+      infowindow.open(this.map, marker);
+      infowindow.addListener('click', () => {
+        infowindow.close();
+      });
+    }
+  }
+
+  showInfowindowForLocation = (location) => {
+    this.populateInfoWindow(this.markers[location.id]);
   }
 
   render() {
@@ -163,6 +185,7 @@ class MyMap extends Component {
                 return(
                   <li
                     id="location"
+                    onClick={(e) => this.showInfowindowForLocation(location)}
                     key={key}>
                     {location.title}
                   </li>
@@ -183,12 +206,12 @@ class MyMap extends Component {
             <i className="fa fa-filter filter-icon" aria-hidden="true" onClick={(e) => this.filterLocation(e)} ></i>
           </span>
           <ul className="location-name-container">
-            {result.map((locationTitle, key) => {
+            {result.map((location, key) => {
               return(
                 <li
                   id="location"
                   key={key}>
-                  {locationTitle}
+                  {location.title}
                 </li>
               );
             })}
