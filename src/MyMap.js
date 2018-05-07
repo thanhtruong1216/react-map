@@ -188,11 +188,17 @@ class MyMap extends Component {
   populateInfoWindow = (marker) => {
     let infowindow = this.state.largeInfowindow;
     let checkAddress = null;
+    let checkCity = null;
     if(infowindow.marker !== marker) {
       if(marker.address === undefined) {
         checkAddress = 'Adress is not available'
       } else {
         checkAddress = marker.address
+      }
+      if(marker.city === undefined) {
+        checkCity = 'City is not available'
+      } else {
+        checkCity = marker.city
       }
       infowindow.marker = marker;
       infowindow.setContent(`
@@ -200,7 +206,7 @@ class MyMap extends Component {
         </div><div>${marker.title}</div>
         <div>${marker.type}</div>
         <div>${checkAddress}</div>
-        <div>${marker.city}</div>
+        <div>${checkCity}</div>
       `);
       infowindow.open(this.map, marker);
       infowindow.addListener('click', () => {
