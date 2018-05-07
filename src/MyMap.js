@@ -17,6 +17,7 @@ class MyMap extends Component {
       locations: locations
     }
   }
+
   filterLocation = (e) => {
     this.setState({
       searchingState: true
@@ -24,7 +25,7 @@ class MyMap extends Component {
     const {result} = this.state;
     e.preventDefault();
     const {locations} = this.state;
-    let locationFiltered = locations.filter((location) => location.title.match(new RegExp(this.input.value)));
+    let locationFiltered = locations.filter((location) => location.title.match(new RegExp(this.input.value, 'i')));
     this.setState({result: locationFiltered})
 
     // let locationIdsResult = result.map(x => x.id + '');
@@ -33,10 +34,9 @@ class MyMap extends Component {
     let locationIdsThatHasMarker = Object.keys(this.markers);
     let set1 = new Set(locationIdsResult);
     let set2 = new Set(locationIdsThatHasMarker);
-    debugger
     let locationIdsDifference = [...set2].filter(x => !set1.has(x)).map(Number);
     let diff_markers = locationIdsDifference.map(id => this.markers[id]);
-    console.log("Diff", diff_markers);
+
     diff_markers.forEach(function(marker) {
       marker.setMap(null);
     })
@@ -45,7 +45,7 @@ class MyMap extends Component {
       delete this.markers[id];
     })
 
-    this.populateInfoWindow(this.markers);
+    // this.populateInfoWindow(this.markers);
   }
 
   componentDidMount() {
@@ -53,7 +53,6 @@ class MyMap extends Component {
     const {venues} = this.state;
     let locationInfo = null;
     interval = setInterval(() => {
-      console.log('in interval')
       /* global google */
       if(typeof google !== 'undefined' && typeof google.maps !== 'undefined' && typeof google.maps.Map !== 'undefined') {
         clearInterval(interval);
@@ -65,19 +64,15 @@ class MyMap extends Component {
       ${location.location.lat},${location.location.lng}&oauth_token=1O0IBO4YM04WTZXRT3ALWM333MHCF3FXOSCCVBHDZDYZRYPC&v=20180417`;
       superagent
       .get(fourSquareUrl)
-      .query(null)
       .set('Accept','text/json')
       .end((error, response) => {
-        const venues = response.body.response.venues;
-        for(let i = 0; i < venues.length; i++) {
-          console.log(`Name: ${venues[i].name}, Adress: ${venues[i].location.address}, Phone: ${venues[i].contact.phone}`)
-          locationInfo = `<div>Name: ${venues[i].name}</div>div>Adress: ${venues[i].location.address}</div><div>Phone: ${venues[i].contact.phone}</div>`
-        }
+        let venuesResponse = response.body.response.venues[0];
+        this.state.venues.push(venuesResponse);
         this.setState({venues})
+        console.log("venues state", this.state.venues)
       })
     })
   }
-
   initMap() {
     this.bounds = new google.maps.LatLngBounds();
     let defaultIcon = makeMarkerIcon('0091ff');
@@ -104,12 +99,16 @@ class MyMap extends Component {
 
 
     for(let i = 0; i < this.state.locations.length; i++) {
+      console.log("state", this.state.venues)
       let location = this.state.locations[i]
       let position = location.location;
       let title = location.title;
       let type = location.type;
       let image = location.image;
       let id = location.id;
+      let address = this.state.venues[i].location.address;
+      let city = this.state.venues[i].location.city;
+      // let contact = this.state.venues.location.address;
       let marker = new google.maps.Marker({
         map: this.map,
         position: position,
@@ -118,7 +117,9 @@ class MyMap extends Component {
         icon: defaultIcon,
         image: image,
         animation: google.maps.Animation.DROP,
-        id: id
+        id: id,
+        address: address,
+        city: city
       })
       this.markers[location.id] = marker;
 
@@ -152,6 +153,8 @@ class MyMap extends Component {
         <div class="marker-image-container"><img class="marker-image" src=${marker.image} alt=${marker.title}/>
         </div><div>${marker.title}</div>
         <div>${marker.type}</div>
+        <div>${marker.address}</div>
+        <div>${marker.city}</div>
       `);
       infowindow.open(this.map, marker);
       infowindow.addListener('click', () => {
@@ -165,10 +168,20 @@ class MyMap extends Component {
   }
 
   render() {
-    const {result} = this.state;
-    let searchBoxNode = null;
-    if(!this.state.searchingState) {
-      searchBoxNode =
+    let locations;
+    let alertSearchResultEmpty = null;
+    if(this.state.searchingState) {
+      locations = this.state.result;
+    } else {
+      locations = this.state.locations;
+    }
+    if(this.state.searchingState && this.state.result.length === 0) {
+      alertSearchResultEmpty = (
+        <div className="alert-location-search-box">No location match</div>
+      )
+    }
+    return (
+      <div className="container">
         <div className="search-box" >
           <input
             id="search-box-input"
@@ -176,51 +189,25 @@ class MyMap extends Component {
             placeholder="Location name"
             ref={(input) => this.input = input}
             onClick={this.searching}
-            />
-            <span>
-              <i className="fa fa-filter filter-icon" aria-hidden="true" onClick={(e) => this.filterLocation(e)} ></i>
-            </span>
-            <ul className="location-name-container">
-              {this.state.locations.map((location, key) => {
-                return(
-                  <li
-                    id="location"
-                    onClick={(e) => this.showInfowindowForLocation(location)}
-                    key={key}>
-                    {location.title}
-                  </li>
-                );
-              })}
-            </ul>
-        </div>
-    } else {
-      searchBoxNode =
-        <div className="search-box">
-          <input
-            id="search-box-input"
-            type="search"
-            placeholder="Location name"
-            ref={(input) => this.input = input}
           />
           <span>
             <i className="fa fa-filter filter-icon" aria-hidden="true" onClick={(e) => this.filterLocation(e)} ></i>
           </span>
+          {alertSearchResultEmpty}
           <ul className="location-name-container">
-            {result.map((location, key) => {
+            {locations.map((location, key) => {
               return(
                 <li
                   id="location"
+                  onClick={(e) => this.showInfowindowForLocation(location)}
                   key={key}>
                   {location.title}
                 </li>
               );
             })}
           </ul>
+
         </div>
-    }
-    return (
-      <div className="container">
-        {searchBoxNode}
         <div className="map" id='map'></div>
       </div>
     );
