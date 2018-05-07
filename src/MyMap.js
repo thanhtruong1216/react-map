@@ -9,7 +9,7 @@ class MyMap extends Component {
     super(props);
     this.mapDom = React.createRef();
     this.markers = {};
-    this.venues = {},
+    this.venues = {};
     this.state = {
       result: [],
       searchingState: false,
@@ -22,13 +22,11 @@ class MyMap extends Component {
     this.setState({
       searchingState: true
     })
-    const {result} = this.state;
     e.preventDefault();
     const {locations} = this.state;
     let locationFiltered = locations.filter((location) => location.title.match(new RegExp(this.input.value, 'i')));
     this.setState({result: locationFiltered})
 
-    // let locationIdsResult = result.map(x => x.id + '');
     let locationIdsResult = locationFiltered.map(x => x.id + '');
 
     let locationIdsThatHasMarker = Object.keys(this.markers);
@@ -98,8 +96,6 @@ class MyMap extends Component {
 
   componentDidMount() {
     let interval;
-    const {venues} = this.state;
-    let locationInfo = null;
     interval = setInterval(() => {
       /* global google */
       if(typeof google !== 'undefined' && typeof google.maps !== 'undefined' && typeof google.maps.Map !== 'undefined') {
@@ -117,7 +113,6 @@ class MyMap extends Component {
       .end((error, response) => {
         let venuesResponse = response.body.response.venues[0];
         this.venues[location.id] = venuesResponse;
-        console.log("data", this.venues);
       })
     })
   }
@@ -193,12 +188,11 @@ class MyMap extends Component {
   populateInfoWindow = (marker) => {
     let infowindow = this.state.largeInfowindow;
     let checkAddress = null;
-    if(infowindow.marker != marker) {
+    if(infowindow.marker !== marker) {
       if(marker.address === undefined) {
         checkAddress = 'Adress is not available'
       } else {
         checkAddress = marker.address
-
       }
       infowindow.marker = marker;
       infowindow.setContent(`
