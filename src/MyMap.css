@@ -6,13 +6,9 @@ h3 {
   margin: 0;
 }
 
-.map {
-  height: 100vh;
-}
-
 .info-window-container {
-  width: 300px;
-  height: 300px;
+  width: 200px;
+  height: 200px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -26,12 +22,8 @@ h3 {
 }
 
 .search-box {
-  width: 300px;
-  height: 100%;
-  position: absolute;
-  z-index: 9999;
   background-color: white;
-  padding: 20px 20px 0 20px;
+  padding: 20px 20px 10px 20px;
   border: 1px solid #19a0d8;
 }
 
@@ -48,11 +40,6 @@ h3 {
   outline: none;
 }
 
-.container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
 
 .location-name-container {
   list-style-type: none;
@@ -77,41 +64,43 @@ h3 {
   padding: 20px;
 }
 
-/* Responsive */
-@media only screen and (max-width: 768px) {
-  .container {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  .map-container {
-    min-width: 400px;
-    flex: 2;
-    position: relative;
-  }
-
-  .map {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: green;
-  }
-
-  .search-box {
-    height: 222px;
-    flex: 1;
-  }
-  .search-box input {
-    padding-top: 0;
-  }
-
-  .location-name-container {
-    line-height: 25px;
-    padding-top: 10px;
-  }
+.container {
+  display: flex;
+  flex-wrap: wrap;
 }
 
+.search-box, .map-container {
+  border: 1px solid;
+  min-width: 300px;
+  min-height: 300px;
+}
 
+.map {
+  position: fixed;
+}
+
+.search-box {
+  flex: 1;
+}
+
+.map-container {
+  flex: 2;
+  position: relative;
+  padding-left: 20px;
+}
+
+.map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: green;
+}
+
+@media screen and (min-width: 800px) {
+  .map-container {
+    height: 100vh;
+  }
+}
 
