@@ -101,7 +101,6 @@ h3 {
 }
 
 .search-box, .map-container {
-  border: 1px solid;
   min-width: 300px;
   min-height: 300px;
 }
