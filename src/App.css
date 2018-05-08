@@ -124,7 +124,7 @@ h3 {
   background: #19a0d8;
 }
 
-@media screen and (min-width: 800px) {
+@media screen and (min-width: 600px) {
   .map-container {
     height: 100vh;
   }
