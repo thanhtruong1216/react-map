@@ -84,7 +84,7 @@ h3 {
 }
 
 .map-container {
-  flex: 2;
+  flex: 3;
   position: relative;
   padding-left: 20px;
 }
@@ -95,7 +95,7 @@ h3 {
   left: 0;
   bottom: 0;
   right: 0;
-  background: green;
+  background: #19a0d8;
 }
 
 @media screen and (min-width: 800px) {
