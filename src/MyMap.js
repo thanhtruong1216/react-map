@@ -3,6 +3,7 @@ import './MyMap.css';
 import superagent from 'superagent';
 import locations from './Locations';
 import styles from './StylesMap';
+import Proptypes from 'prop-types';
 
 class MyMap extends Component {
   constructor(props) {
@@ -11,13 +12,13 @@ class MyMap extends Component {
     this.markers = {};
     this.venues = {};
     this.state = {
-      result: [],
+      searchResult: [],
       searchingState: false,
       largeInfowindow: null,
       locations: locations
     }
   }
-
+// Filter location when click filter icon in search box
   filterLocation = (e) => {
     this.setState({
       searchingState: true
@@ -25,20 +26,21 @@ class MyMap extends Component {
     e.preventDefault();
     const {locations} = this.state;
     let locationFiltered = locations.filter((location) => location.title.match(new RegExp(this.input.value, 'i')));
-    this.setState({result: locationFiltered})
+    this.setState({searchResult: locationFiltered})
 
+  // Find the marker that has in search result but not has in markers
     let locationIdsResult = locationFiltered.map(x => x.id + '');
-
     let locationIdsThatHasMarker = Object.keys(this.markers);
     let set1 = new Set(locationIdsResult);
     let set2 = new Set(locationIdsThatHasMarker);
     let locationIdsDifference = [...set2].filter(x => !set1.has(x)).map(Number);
     let addmarker = [...set1].filter(x => !set2.has(x)).map(Number);
     let diff_markers = locationIdsDifference.map(id => this.markers[id]);
+  // Loop through array of differrence markers and set map is null
     diff_markers.forEach(function(marker) {
       marker.setMap(null);
     })
-
+  // Loop through array of difference locations and delele it from makers object
     locationIdsDifference.forEach(id => {
       delete this.markers[id];
     })
@@ -56,13 +58,20 @@ class MyMap extends Component {
     }
     let locationIdsSet = new Set(addmarker);
     let locationToAddMarkers = this.state.locations.filter(location => locationIdsSet.has(location.id))
+  // Create maker
     for(let i = 0; i < locationToAddMarkers.length; i++) {
-      let location = locationToAddMarkers[i]
+      let location = locationToAddMarkers[i];
       let position = location.location;
       let title = location.title;
       let type = location.type;
       let image = location.image;
       let id = location.id;
+      let data = this.venues[id];
+      let address = data.location.address;
+      let city = data.location.city;
+      let phoneNumber = data.contact.phone;
+      let checking = data.stats.checkinsCount;
+      let name = data.categories[0].name;
       let marker = new google.maps.Marker({
         map: this.map,
         position: position,
@@ -72,6 +81,11 @@ class MyMap extends Component {
         id: id,
         image:image,
         icon: defaultIcon,
+        address:address,
+        city: city,
+        phoneNumber: phoneNumber,
+        checking: checking,
+        name: name
       })
       this.markers[location.id] = marker;
 
@@ -103,8 +117,9 @@ class MyMap extends Component {
         this.initMap()
       }
     }, 1500)
+  // Fetch data from foursquare API and save it to venues object
     const urls = this.state.locations.map((location) => {
-      const fourSquareUrl = `https://api.foursquare.com/v2/venues/search?ll=
+      let fourSquareUrl = `https://api.foursquare.com/v2/venues/search?ll=
       ${location.location.lat},${location.location.lng}&oauth_token=1O0IBO4YM04WTZXRT3ALWM333MHCF3FXOSCCVBHDZDYZRYPC&v=20180417`;
       superagent
       .get(fourSquareUrl)
@@ -113,22 +128,24 @@ class MyMap extends Component {
       .end((error, response) => {
         let venuesResponse = response.body.response.venues[0];
         this.venues[location.id] = venuesResponse;
+        console.log("venues data", this.venues);
       })
     })
   }
   initMap() {
-    this.bounds = new google.maps.LatLngBounds();
-    let defaultIcon = makeMarkerIcon('0091ff');
-    let highlightedIcon = makeMarkerIcon('FFFF24');
-    let mapDom = document.getElementById('map');
     let mapConfigs = {
-      center: { lat: 10.779983, lng: 106.699058 },
+      center: { lat: 10.758334, lng: 106.672211 },
       zoom: 13,
       styles: styles,
       mapTypeControl: false
     };
+    let defaultIcon = makeMarkerIcon('0091ff');
+    let highlightedIcon = makeMarkerIcon('FFFF24');
+    let mapDom = document.getElementById('map');
+    this.bounds = new google.maps.LatLngBounds();
     this.setState({largeInfowindow: new google.maps.InfoWindow()});
     this.map = new google.maps.Map(mapDom, mapConfigs);
+
     function makeMarkerIcon(markerColor) {
       let markerImage = new google.maps.MarkerImage(
         'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
@@ -140,7 +157,6 @@ class MyMap extends Component {
       return markerImage;
     }
 
-
     for(let i = 0; i < this.state.locations.length; i++) {
       let location = this.state.locations[i]
       let position = location.location;
@@ -148,8 +164,12 @@ class MyMap extends Component {
       let type = location.type;
       let image = location.image;
       let id = location.id;
-      let address = this.venues[id].location.address;
-      let city = this.venues[id].location.city;
+      let data = this.venues[id];
+      let address = data.location.address;
+      let city = data.location.city;
+      let phoneNumber = data.contact.phone;
+      let checking = data.stats.checkinsCount;
+      let name = data.categories[0].name;
       let marker = new google.maps.Marker({
         map: this.map,
         position: position,
@@ -160,7 +180,10 @@ class MyMap extends Component {
         animation: google.maps.Animation.DROP,
         id: id,
         address:address,
-        city: city
+        city: city,
+        phoneNumber: phoneNumber,
+        checking: checking,
+        name: name
       })
       this.markers[location.id] = marker;
 
@@ -184,29 +207,40 @@ class MyMap extends Component {
 
     this.map.fitBounds(this.bounds);
   }
-
+// Create info window content and check type of data to decide what imformation will show.
   populateInfoWindow = (marker) => {
     let infowindow = this.state.largeInfowindow;
     let checkAddress = null;
     let checkCity = null;
+    let checkPhoneNumber = null;
     if(infowindow.marker !== marker) {
       if(marker.address === undefined) {
         checkAddress = 'Adress is not available'
       } else {
         checkAddress = marker.address
       }
+
       if(marker.city === undefined) {
         checkCity = 'City is not available'
       } else {
         checkCity = marker.city
       }
+
+      if(marker.phoneNumber === undefined) {
+        checkPhoneNumber = 'Phone number is not available'
+      } else {
+        checkPhoneNumber = marker.phoneNumber
+      }
+
       infowindow.marker = marker;
       infowindow.setContent(`
-        <div class="marker-image-container"><img class="marker-image" src=${marker.image} alt=${marker.title}/>
-        </div><div>${marker.title}</div>
-        <div>${marker.type}</div>
-        <div>${checkAddress}</div>
-        <div>${checkCity}</div>
+        <div class="info-window-container">
+          <img class="marker-image" src=${marker.image} alt=${marker.title}/>
+          <h3>${marker.title}</h3>
+          <p>${marker.name}</p>
+          <address>Adress: ${checkAddress}</br>${checkCity}</br>${checkPhoneNumber}</address>
+          <p>Checking count: ${marker.checking}</p>
+        </div>
       `);
       infowindow.open(this.map, marker);
       infowindow.addListener('click', () => {
@@ -215,6 +249,7 @@ class MyMap extends Component {
     }
   }
 
+// Show info window when click on the name of the location
   showInfowindowForLocation = (location) => {
     this.populateInfoWindow(this.markers[location.id]);
   }
@@ -223,11 +258,11 @@ class MyMap extends Component {
     let locations;
     let alertSearchResultEmpty = null;
     if(this.state.searchingState) {
-      locations = this.state.result;
+      locations = this.state.searchResult;
     } else {
       locations = this.state.locations;
     }
-    if(this.state.searchingState && this.state.result.length === 0) {
+    if(this.state.searchingState && this.state.searchResult.length === 0) {
       alertSearchResultEmpty = (
         <div className="alert-location-search-box">No location match</div>
       )
@@ -258,12 +293,20 @@ class MyMap extends Component {
               );
             })}
           </ul>
-
         </div>
-        <div className="map" id='map'></div>
+        <div className="map-container">
+          <div className="map" id="map"></div>
+        </div>
       </div>
     );
   }
 }
 
+MyMap.proptypes = {
+  searchResult: Proptypes.array.isRequired,
+  locations: Proptypes.array.isRequired,
+  venues: Proptypes.object.isRequired,
+  markers: Proptypes.object.isRequired,
+}
 export default MyMap;
+
