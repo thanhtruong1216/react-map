@@ -1,39 +1,47 @@
 * {
   box-sizing: border-box;
 }
+h3 {
+  padding: 0;
+  margin: 0;
+}
 
 .map {
   height: 100vh;
 }
 
-.marker-image-container {
-  width: 100px;
-  height: 100px;
+.info-window-container {
+  width: 300px;
+  height: 300px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
 .marker-image {
+  display: block;
   width: 100%;
-  height: 100%
+  height: 120px;
 }
 
 .search-box {
   width: 300px;
   height: 100%;
-  border: 1px solid red;
   position: absolute;
   z-index: 9999;
   background-color: white;
   padding: 20px 20px 0 20px;
+  border: 1px solid #19a0d8;
 }
 
 .search-box input {
-  width: 80%;
-  height: 30px;
+  display: inline-block;
+  width: 85%;
+  height: 40px;
   margin-right: 20px;
   padding-left: 10px;
+  padding-top: 20px;
 }
 
 .search-box input:focus {
@@ -42,6 +50,8 @@
 
 .container {
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .location-name-container {
@@ -50,7 +60,7 @@
   margin: 0;
   text-align: left;
   font-size: 10pt;
-  line-height: 30px;
+  line-height: 50px;
   padding-top: 30px;
 }
 
@@ -66,4 +76,42 @@
   text-align: left;
   padding: 20px;
 }
+
+/* Responsive */
+@media only screen and (max-width: 768px) {
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .map-container {
+    min-width: 400px;
+    flex: 2;
+    position: relative;
+  }
+
+  .map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: green;
+  }
+
+  .search-box {
+    height: 222px;
+    flex: 1;
+  }
+  .search-box input {
+    padding-top: 0;
+  }
+
+  .location-name-container {
+    line-height: 25px;
+    padding-top: 10px;
+  }
+}
+
+
 
