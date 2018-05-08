@@ -39,6 +39,11 @@ h3 {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;
+}
+
+.info-window-container address {
+  text-align: center;
 }
 
 .marker-image {
