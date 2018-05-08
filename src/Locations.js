@@ -3,7 +3,7 @@ const locations = [
     id: 1,
     title: 'LotteMart Supermarket',
     type: 'Supermarket',
-    image: 'http://cdn.onlinewebfonts.com/svg/img_243357.png',
+    image: 'http://lottemart.com.vn/wp-content/uploads/2017/03/lotte-mart-q11.jpg',
     location: {
       lat: 10.741401,
       lng: 106.702040
@@ -13,7 +13,7 @@ const locations = [
     id: 2,
     title: 'Ton Duc Thang University',
     type: 'University',
-    image: 'https://cdn2.iconfinder.com/data/icons/crazy-paparazzi-collection-svg/100/Noun_Project_100Icon_10px_grid_2-47-128.png',
+    image: 'https://i.ytimg.com/vi/lNu9u52W8vg/maxresdefault.jpg',
     location: {
       lat: 10.733731,
       lng: 106.699870
@@ -21,12 +21,12 @@ const locations = [
   },
   {
     id: 3,
-    title: 'Vietcombank',
-    type: 'Bank',
-    image: 'https://cdn2.iconfinder.com/data/icons/realty-business/512/euro_bank-512.png',
+    title: 'An Dong Market',
+    type: 'market',
+    image: 'https://www.emporis.com/images/show/350414-Large-exterior-main-entrance-to-the-shopping-mall-at-street-level.jpg',
     location: {
-      lat: 10.740717,
-      lng: 106.702197
+      lat: 10.758334,
+      lng: 106.672211
     }
 
   },
@@ -34,7 +34,7 @@ const locations = [
     id: 4,
     title: 'Starlight Bridge',
     type: 'Park',
-    image: 'https://d30y9cdsu7xlg0.cloudfront.net/png/12246-200.png',
+    image: 'http://3.bp.blogspot.com/-LAGfRrxN05E/USwZZEznXdI/AAAAAAAANio/OFWq5-8Thbs/s1600/2371ek6GVNTh.jpg',
     location: {
       lat: 10.726011,
       lng: 106.717060
@@ -44,7 +44,7 @@ const locations = [
     id: 5,
     title: 'Vivo City',
     type: 'Entertainment Center',
-    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRW8AFE-4wR8t-8pol-_kyuoAd7RX5XbN4nknqTjxhNGLFOFCv8Q',
+    image: 'https://i1.wp.com/fifthperson.com/wp-content/uploads/2016/08/vivocity.png?resize=620%2C400&ssl=1',
     location: {
       lat: 10.730543,
       lng: 106.703526
