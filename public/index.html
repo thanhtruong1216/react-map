@@ -38,7 +38,13 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
   </body>
+   <script>
+    function googleError() {
+      console.log("Google map is loading....")
+    }
+  </script>
   <script async defer
-     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDUr5mlHLTtdziAczT2qvnDC8srRk9xJGA&libraries=places">
+     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDUr5mlHLTtdziAczT2qvnDC8srRk9xJGA&libraries=places
+     onerror="googleError()">
   </script>
 </html>
